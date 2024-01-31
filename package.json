@@ -6,9 +6,15 @@
   "scripts": {
     "tsx": "tsx"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "fortigate",
+    "vpn",
+    "ssl",
+    "web",
+    "sslvpn"
+  ],
+  "author": "Mikkel RINGAUD <mikkel@milescode.dev> (https://github.com/Vexcited)",
+  "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.13",
     "tsx": "^4.7.0"
