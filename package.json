@@ -1,0 +1,19 @@
+{
+  "name": "fortigate-web-sslvpn",
+  "version": "1.0.0",
+  "description": "Make requests through FortiGate SSL VPN using the web mode.",
+  "main": "./dist/index.js",
+  "scripts": {
+    "tsx": "tsx"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.11.13",
+    "tsx": "^4.7.0"
+  },
+  "dependencies": {
+    "http-parser-js": "^0.5.8"
+  }
+}
