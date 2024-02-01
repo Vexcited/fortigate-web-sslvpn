@@ -36,7 +36,7 @@ export const createLogin = async (username: string, password: string, origin: st
     const response = await fetch(url, {
       method: "POST",
       headers: requestHeaders,
-      body,
+      body
     });
 
     responseHeaders = response.headers;
@@ -65,4 +65,4 @@ export const createLogin = async (username: string, password: string, origin: st
     redirectionPath: values.redir,
     tempToken: temporaryToken
   };
-}
+};

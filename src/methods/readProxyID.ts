@@ -1,5 +1,5 @@
 import { PORTAL_PATH, TOKEN_COOKIE } from "../utils/constants";
-import isNode from "../utils/isNode"
+import isNode from "../utils/isNode";
 
 export const readProxyID = async (token: string, origin: string): Promise<string> => {
   const url = `${origin}${PORTAL_PATH}`;
@@ -15,7 +15,7 @@ export const readProxyID = async (token: string, origin: string): Promise<string
     const response = await nodeRequestTLS({
       method: "GET",
       href: url,
-      headers: requestHeaders,
+      headers: requestHeaders
     });
 
     responseHeaders = response.headers;
@@ -25,7 +25,7 @@ export const readProxyID = async (token: string, origin: string): Promise<string
   else {
     const response = await fetch(url, {
       method: "GET",
-      headers: requestHeaders,
+      headers: requestHeaders
     });
 
     responseHeaders = response.headers;
@@ -39,7 +39,7 @@ export const readProxyID = async (token: string, origin: string): Promise<string
 
   const key = "fgt_sslvpn_sid"; // Key containing the proxy ID.
   const startIndex = data.indexOf(key) + key.length + 4; // `+ 4` for the `":"`
-  const endIndex = data.indexOf('"', startIndex);
+  const endIndex = data.indexOf("\"", startIndex);
 
   return data.slice(startIndex, endIndex);
-}
+};

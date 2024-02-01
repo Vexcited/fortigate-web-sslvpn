@@ -17,7 +17,7 @@ export const transformTemporaryToken = async (temporaryToken: string, hostCheckU
     const response = await nodeRequestTLS({
       method: "GET",
       href: hostCheckURL,
-      headers: requestHeaders,
+      headers: requestHeaders
     });
 
     responseHeaders = response.headers;
@@ -30,7 +30,7 @@ export const transformTemporaryToken = async (temporaryToken: string, hostCheckU
 
     responseHeaders = response.headers;
   }
-  
+
   const token = readSetCookie(responseHeaders.get("set-cookie") ?? "", TOKEN_COOKIE);
   if (!token) throw new Error("FortiGate: Could not retrieve authentication token from response.");
 

@@ -1,5 +1,5 @@
-import { TOKEN_COOKIE } from "../utils/constants"
-import isNode from "../utils/isNode"
+import { TOKEN_COOKIE } from "../utils/constants";
+import isNode from "../utils/isNode";
 
 export interface VPNRequestInit {
   /** @default "GET" */
@@ -43,7 +43,7 @@ class FortiGateWebSSLVPN {
         headers,
         body
       });
-  
+
       responseHeaders = response.headers;
       responseStatus = response.statusCode;
       responseText = response.body.toString("utf8");
@@ -54,7 +54,7 @@ class FortiGateWebSSLVPN {
         headers,
         body: method === "GET" ? void 0 : body
       });
-  
+
       responseText = await response.text();
       responseHeaders = response.headers;
       responseStatus = response.status;
