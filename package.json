@@ -4,6 +4,7 @@
   "description": "Make requests through FortiGate SSL VPN using the web mode.",
   "main": "./dist/index.js",
   "scripts": {
+    "build": "tsup ./src/index.ts --format cjs,esm --dts --clean",
     "tsx": "tsx"
   },
   "keywords": [
@@ -17,7 +18,9 @@
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.11.13",
-    "tsx": "^4.7.0"
+    "tsup": "^8.0.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
   },
   "dependencies": {
     "http-parser-js": "^0.5.8"
