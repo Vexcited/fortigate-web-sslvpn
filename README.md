@@ -1,7 +1,5 @@
 # `fortigate-web-sslvpn`
 
-> State of the project: **WIP**.
-
 This module focuses on the **web mode** of FortiGate SSL VPN, if you are looking for the **tunnel mode** check out [`openfortivpn`](https://github.com/adrienverge/openfortivpn).
 
 ## Motivations
@@ -20,12 +18,48 @@ In my case, I needed to connect to a service through SSL VPN from a serverless A
 
 ## Installation
 
+You can use any package manager you want, here are some examples:
+
 ```bash
-# Nothing, yet.
+# NPM
+npm install fortigate-web-sslvpn
+
+# Yarn
+yarn add fortigate-web-sslvpn
+
+# pnpm
+pnpm add fortigate-web-sslvpn
 ```
 
 ## Usage
 
 ```typescript
-// TODO whenever the API is stable enough.
+import { initWebSSLVPNSession } from "fortigate-web-sslvpn";
+
+// Authenticate and create a VPN session.
+const vpn = await initWebSSLVPNSession(
+  "username",
+  "password",
+  "https://sslvpn.example.com" // No trailing slash or path.
+);
+
+// Use the VPN session to make requests.
+const response = await vpn.request("https://service.example.com", {
+  method: "POST",
+  body: JSON.stringify({ hello: "world" }),
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer DummyTokenForExample"
+  }
+});
+
+// Returns a `Headers` object containing the response headers.
+// Learn more at <https://developer.mozilla.org/docs/Web/API/Headers>
+console.log(response.headers);
+
+// Status code of the response as a number, e.g. `200`
+console.log(response.status);
+
+// The response body as a string.
+console.log(response.data); // e.g. `{"hello":"world"}`
 ```
