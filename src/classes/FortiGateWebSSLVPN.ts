@@ -6,6 +6,9 @@ export interface VPNRequestInit {
   method?: string
   headers?: Record<string, string>
   body?: string
+
+  /** @default "utf-8" */
+  encoding?: string
 }
 
 export interface VPNResponse {
@@ -22,17 +25,18 @@ class FortiGateWebSSLVPN {
   ) {}
 
   async request (url: string, init: VPNRequestInit): Promise<VPNResponse> {
-    const { method = "GET", headers = {}, body } = init;
+    const { method = "GET", headers = {}, body, encoding = "utf-8" } = init;
     const parsedURL = new URL(url);
     const requestURL = `${this.origin}/proxy/${this.proxyID}/${parsedURL.protocol.slice(0, -1)}/${parsedURL.host + parsedURL.pathname + parsedURL.search + parsedURL.hash}`;
 
     let responseHeaders: Headers;
     let responseStatus: number;
-    let responseText: string;
+    let responseBuffer: ArrayBuffer | Buffer;
 
     const authenticationCookie = `${TOKEN_COOKIE}=${this.token}`;
     if (headers.Cookie) headers.Cookie += `; ${authenticationCookie}`;
     else headers.Cookie = authenticationCookie;
+
 
     if (isNode()) {
       const { nodeRequestTLS } = await import("../utils/httpTCP");
@@ -46,7 +50,7 @@ class FortiGateWebSSLVPN {
 
       responseHeaders = response.headers;
       responseStatus = response.statusCode;
-      responseText = response.body.toString("utf8");
+      responseBuffer = response.body;
     }
     else {
       const response = await fetch(requestURL, {
@@ -55,10 +59,13 @@ class FortiGateWebSSLVPN {
         body: method === "GET" ? void 0 : body
       });
 
-      responseText = await response.text();
+      responseBuffer = await response.arrayBuffer()
       responseHeaders = response.headers;
       responseStatus = response.status;
     }
+
+    const decoder = new TextDecoder(encoding);
+    const responseText = decoder.decode(responseBuffer);
 
     return {
       headers: responseHeaders,
