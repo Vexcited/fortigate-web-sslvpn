@@ -59,7 +59,7 @@ class FortiGateWebSSLVPN {
         body: method === "GET" ? void 0 : body
       });
 
-      responseBuffer = await response.arrayBuffer()
+      responseBuffer = await response.arrayBuffer();
       responseHeaders = response.headers;
       responseStatus = response.status;
     }
