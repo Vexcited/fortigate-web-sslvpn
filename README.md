@@ -62,4 +62,8 @@ console.log(response.status);
 
 // The response body as a string.
 console.log(response.data); // e.g. `{"hello":"world"}`
+
+// You can also close the VPN session when you're done.
+// Otherwise, it usually expires after 5 minutes.
+await vpn.close();
 ```
