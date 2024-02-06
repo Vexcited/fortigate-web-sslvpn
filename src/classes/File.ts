@@ -54,7 +54,6 @@ class FileEntry {
   }
 
   public async enterFolder (): Promise<FileEntry[]> {
-    console.log(this.type);
     if (this.type !== 5) throw new Error("This file is not a folder.");
 
     const method = "POST";
