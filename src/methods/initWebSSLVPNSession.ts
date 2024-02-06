@@ -13,7 +13,5 @@ export const initWebSSLVPNSession = async (username: string, password: string, o
   const { redirectionPath, tempToken } = await createLogin(username, password, origin);
 
   const token = await transformTemporaryToken(tempToken, origin + redirectionPath);
-  const proxyID = await readProxyID(token, origin);
-
-  return new FortiGateWebSSLVPN(proxyID, token, origin);
+  return new FortiGateWebSSLVPN(token, origin);
 };

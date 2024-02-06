@@ -4,6 +4,7 @@ import { encode } from "../utils/encoding";
 import FileEntry, { FileData } from "./File";
 import { readSetCookie } from "../utils/readSetCookie";
 import readNetworkFiles from "../utils/readNetworkFiles";
+import { readProxyID } from "../methods/readProxyID";
 
 export interface VPNRequestInit {
   /** @default "GET" */
@@ -22,13 +23,18 @@ export interface VPNResponse {
 }
 
 class FortiGateWebSSLVPN {
+  public proxyID: string | undefined;
+
   constructor (
-    private proxyID: string,
     public token: string,
     public origin: string
   ) {}
 
   public async request (url: string, init: VPNRequestInit): Promise<VPNResponse> {
+    if (!this.proxyID) { // Read the proxy ID if it's not already set.
+      this.proxyID = await readProxyID(this.token, this.origin);
+    }
+
     const { method = "GET", headers = {}, body, encoding = "utf-8" } = init;
     const parsedURL = new URL(url);
     const requestURL = `${this.origin}/proxy/${this.proxyID}/${parsedURL.protocol.slice(0, -1)}/${parsedURL.host + parsedURL.pathname + parsedURL.search + parsedURL.hash}`;
@@ -114,10 +120,10 @@ class FortiGateWebSSLVPN {
   /**
    * Creates a SMB session with the VPN.
    */
-  public async readSMB (path: string, domain: string, credentials: {
+  public async initSMB (path: string, domain: string, credentials: {
     username: string
     password: string
-  }): Promise<FileEntry[]> {
+  }): Promise<{ files: FileEntry[], token: string }> {
     // Remove trailing slash from path.
     if (path.endsWith("/")) path = path.slice(0, -1);
 
@@ -163,7 +169,10 @@ class FortiGateWebSSLVPN {
 
     const json = readNetworkFiles(responseText);
 
-    return json.map((file) => new FileEntry(this, path, file, token, domain));
+    return {
+      files: json.map((file) => new FileEntry(this, path, file, token, domain)),
+      token
+    };
   }
 }
 
