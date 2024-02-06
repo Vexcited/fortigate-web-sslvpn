@@ -123,7 +123,12 @@ class FortiGateWebSSLVPN {
   public async initSMB (path: string, domain: string, credentials: {
     username: string
     password: string
-  }): Promise<{ files: FileEntry[], token: string }> {
+  }): Promise<{
+    /** Files contained in the path given. */
+      files: FileEntry[]
+      /** Token that can be used to do more requests to the SMB without initializing a new session. */
+      token: string
+    }> {
     // Remove trailing slash from path.
     if (path.endsWith("/")) path = path.slice(0, -1);
 
@@ -173,6 +178,54 @@ class FortiGateWebSSLVPN {
       files: json.map((file) => new FileEntry(this, path, file, token, domain)),
       token
     };
+  }
+
+  /**
+   * A way to read a directory from an SMB drive using the VPN.
+   * @param token - Obtained using `.initSMB()`. Just read the `token` property in the returned object.
+   *
+   * @example
+   * // You can use this to recover a full session from tokens
+   * const vpn = new FortiGateWebSSLVPN("VPN_TOKEN_STILL_AVAILABLE", "https://ssl-vpn.example.com");
+   * const files = await vpn.readDirectoryFromSMB("//smb.example.com/some/path", "AD", "SMB_TOKEN");
+   */
+  public async readDirectoryFromSMB (path: string, domain: string, token: string) {
+    const method = "POST";
+    const href = `${this.origin}/remote/network`;
+    const headers = {
+      Cookie: `${TOKEN_COOKIE}=${this.token}; ${NETWORK_TOKEN_COOKIE}=${token}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    };
+
+    const body = `protocol=smb&path=${encode(path)}&rootpath=${encode(path)}&workpath=${encode(path)}&domain=${encode(domain)}&type=5&type_flag=`;
+    let responseText: string;
+
+    if (isNode()) {
+      const { nodeRequestTLS } = await import("../utils/httpTCP");
+
+      const response = await nodeRequestTLS({
+        href,
+        method,
+        headers,
+        body
+      });
+
+      responseText = response.body.toString("utf-8");
+    }
+    else {
+      const response = await fetch(href, {
+        method,
+        headers,
+        body
+      });
+
+
+      responseText = await response.text();
+    }
+
+    const json = readNetworkFiles(responseText);
+
+    return json.map((file) => new FileEntry(this, path, file, this.token, domain));
   }
 }
 

@@ -36,13 +36,13 @@ class FileEntry {
   public name: string;
   public path: string;
   public lastModified: Date;
-  /** `0` when it's a folder. */
+  /** `0` when it's a directory. */
   public size: number;
   public type: number;
 
   constructor (
     private client: FortiGateWebSSLVPN,
-    public parentPath: string,
+    parentPath: string,
     raw: FileData,
     private token: string,
     private domain: string
@@ -54,47 +54,10 @@ class FileEntry {
     this.type = parseInt(raw.type);
   }
 
-  public async enterFolder (): Promise<FileEntry[]> {
-    if (this.type !== 5) throw new Error("This file is not a folder.");
-
-    const method = "POST";
-    const href = `${this.client.origin}/remote/network`;
-    const headers = {
-      Cookie: `${TOKEN_COOKIE}=${this.client.token}; ${NETWORK_TOKEN_COOKIE}=${this.token}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    };
-
-    const body = `protocol=smb&path=${encode(this.path)}&workpath=${encode(this.parentPath)}&rootpath=${encode(this.parentPath)}&domain=${encode(this.domain)}&type=${this.type}&type_flag=`;
-    let responseText: string;
-
-    if (isNode()) {
-      const { nodeRequestTLS } = await import("../utils/httpTCP");
-
-      const response = await nodeRequestTLS({
-        href,
-        method,
-        headers,
-        body
-      });
-
-      responseText = response.body.toString("utf-8");
-    }
-    else {
-      const response = await fetch(href, {
-        method,
-        headers,
-        body
-      });
-
-
-      responseText = await response.text();
-    }
-
-    const json = readNetworkFiles(responseText);
-
-    return json.map((file) => new FileEntry(this.client, this.path, file, this.token, this.domain));
+  public async readDirectory (): Promise<FileEntry[]> {
+    if (this.type !== 5) throw new Error("This file is not a directory.");
+    return this.client.readDirectoryFromSMB(this.path, this.domain, this.token);
   }
-
 }
 
 export default FileEntry;
