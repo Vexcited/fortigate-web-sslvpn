@@ -3,6 +3,7 @@ import isNode from "../utils/isNode";
 import { encode } from "../utils/encoding";
 import FileEntry, { FileData } from "./File";
 import { readSetCookie } from "../utils/readSetCookie";
+import readNetworkFiles from "../utils/readNetworkFiles";
 
 export interface VPNRequestInit {
   /** @default "GET" */
@@ -160,10 +161,7 @@ class FortiGateWebSSLVPN {
     const token = readSetCookie(responseHeaders.get("set-cookie") ?? "", NETWORK_TOKEN_COOKIE);
     if (!token) throw new Error("FortiGate: Temporary token cookie not found, can happen when you've entered invalid credentials.");
 
-    const stringIndex = responseText.indexOf("var s = ") + 9;
-    const stringEndIndex = responseText.indexOf("fgt_data = ", stringIndex) - 3;
-    const rawJSON = responseText.slice(stringIndex, stringEndIndex);
-    const json = JSON.parse(rawJSON) as Array<FileData>;
+    const json = readNetworkFiles(responseText);
 
     return json.map((file) => new FileEntry(this, path, file, token, domain));
   }

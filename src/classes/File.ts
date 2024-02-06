@@ -1,6 +1,7 @@
 import { NETWORK_TOKEN_COOKIE, TOKEN_COOKIE } from "../utils/constants";
 import { encode } from "../utils/encoding";
 import isNode from "../utils/isNode";
+import readNetworkFiles from "../utils/readNetworkFiles";
 import FortiGateWebSSLVPN from "./FortiGateWebSSLVPN";
 
 export interface FileData {
@@ -89,10 +90,7 @@ class FileEntry {
       responseText = await response.text();
     }
 
-    const stringIndex = responseText.indexOf("var s = ") + 9;
-    const stringEndIndex = responseText.indexOf("fgt_data = ", stringIndex) - 3;
-    const rawJSON = responseText.slice(stringIndex, stringEndIndex);
-    const json = JSON.parse(rawJSON) as Array<FileData>;
+    const json = readNetworkFiles(responseText);
 
     return json.map((file) => new FileEntry(this.client, this.path, file, this.token, this.domain));
   }
