@@ -5,6 +5,7 @@ import FileEntry, { FileData } from "./File";
 import { readSetCookie } from "../utils/readSetCookie";
 import readNetworkFiles from "../utils/readNetworkFiles";
 import { readProxyID } from "../methods/readProxyID";
+import { AccessDeniedSMB } from "./Errors";
 
 export interface VPNRequestInit {
   /** @default "GET" */
@@ -223,9 +224,60 @@ class FortiGateWebSSLVPN {
       responseText = await response.text();
     }
 
-    const json = readNetworkFiles(responseText);
+    // This script is injected in the HTML page, whenever the access is denied.
+    if (responseText.includes("alert(fgt_lang['sslvpn_networkplaces_err_access_dir'])"))
+      throw new AccessDeniedSMB();
 
-    return json.map((file) => new FileEntry(this, path, file, this.token, domain));
+    const files = readNetworkFiles(responseText);
+    return files.map((file) => new FileEntry(this, path, file, this.token, domain));
+  }
+
+  /**
+   * Get the binary data of a file from an SMB drive using the web VPN.
+   * This function is available as a quick helper in SMB's `FileEntry` instances.
+   *
+   * @example
+   * const rootPath = "//smb.example.com/a/folder";
+   * const fileName = "Some file.txt"; // should be in the `rootPath`
+   * const domain = "AD";
+   *
+   * const binary = await vpn.downloadFileFromSMB(rootPath, fileName, domain, SMB_TOKEN);
+   * // can throw a `AccessDeniedSMB` error if the file is not accessible.
+   */
+  public async downloadFileFromSMB (rootPath: string, fileName: string, domain: string, token: string) {
+    const method = "POST";
+    const href = `${this.origin}/remote/network/download`;
+    const headers = {
+      Cookie: `${TOKEN_COOKIE}=${this.token}; ${NETWORK_TOKEN_COOKIE}=${token}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    };
+
+    const body = `protocol=smb&path=${encode(rootPath)}&rootpath=${encode(rootPath)}&filename=${encode(encodeURIComponent(fileName))}&domain=${encode(domain)}&type=6`;
+    let responseText: string;
+
+    if (isNode()) {
+      const { nodeRequestTLS } = await import("../utils/httpTCP");
+
+      const response = await nodeRequestTLS({
+        href,
+        method,
+        headers,
+        body
+      });
+
+      responseText = response.body.toString("utf-8");
+    }
+    else {
+      const response = await fetch(href, {
+        method,
+        headers,
+        body
+      });
+
+      responseText = await response.text();
+    }
+
+    return responseText;
   }
 }
 
