@@ -58,6 +58,13 @@ class FileEntry {
     if (this.type !== 5) throw new Error("This file is not a directory.");
     return this.client.readDirectoryFromSMB(this.path, this.domain, this.token);
   }
+
+  // public async downloadFile (): Promise<string> {
+  //   if (this.type !== 6) throw new Error("This file is not a file.");
+  //   const directory = this.path.split("/")
+
+  //   return this.client.downloadFileFromSMB(this.path, this.domain, this.token);
+  // }
 }
 
 export default FileEntry;
