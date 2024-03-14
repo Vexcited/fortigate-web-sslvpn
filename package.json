@@ -14,8 +14,7 @@
   "scripts": {
     "build": "tsup ./src/index.ts --dts --minify terser --clean --format cjs,esm --sourcemap",
     "release": "release-it",
-    "lint": "eslint .",
-    "tsx": "tsx"
+    "lint": "tsc && eslint ."
   },
   "files": [
     "dist"
@@ -49,15 +48,14 @@
     }
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^1.5.4",
-    "@types/node": "^20.11.13",
-    "@typescript-eslint/parser": "^6.20.0",
-    "eslint": "^8.56.0",
-    "release-it": "^17.0.3",
-    "terser": "^5.27.0",
-    "tsup": "^8.0.1",
-    "tsx": "^4.7.0",
-    "typescript": "^5.3.3"
+    "@stylistic/eslint-plugin": "^1.7.0",
+    "@types/node": "^20.11.27",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.57.0",
+    "release-it": "^17.1.1",
+    "terser": "^5.29.2",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.2"
   },
   "dependencies": {
     "http-parser-js": "^0.5.8"
