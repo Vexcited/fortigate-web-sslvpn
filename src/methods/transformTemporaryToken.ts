@@ -1,3 +1,4 @@
+import { WrongCredentials } from "../classes/Errors";
 import { TMP_TOKEN_COOKIE, TOKEN_COOKIE } from "../utils/constants";
 import isNode from "../utils/isNode";
 import { readSetCookie } from "../utils/readSetCookie";
@@ -32,7 +33,7 @@ export const transformTemporaryToken = async (temporaryToken: string, hostCheckU
   }
 
   const token = readSetCookie(responseHeaders.get("set-cookie") ?? "", TOKEN_COOKIE);
-  if (!token) throw new Error("FortiGate: Could not retrieve authentication token from response.");
+  if (!token) throw new WrongCredentials();
 
   return token;
 };

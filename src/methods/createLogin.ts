@@ -1,6 +1,7 @@
 import { LOGIN_PATH, TMP_TOKEN_COOKIE } from "../utils/constants";
 import { readSetCookie } from "../utils/readSetCookie";
 import isNode from "../utils/isNode";
+import { RateLimited, WrongCredentials } from "../classes/Errors";
 
 /** Logins to the web interface and returns the redirection path and temporary token. */
 export const createLogin = async (username: string, password: string, origin: string): Promise<{
@@ -51,15 +52,15 @@ export const createLogin = async (username: string, password: string, origin: st
     return acc;
   }, {} as Record<string, string>);
 
-  if (responseStatus !== 200) throw new Error(`FortiGate: Unexpected status code ${responseStatus} when logging in, you may be rate limited, try again later.`);
+  if (responseStatus !== 200) throw new RateLimited();
   if (values.ret !== "1") {
-    if (values.redir.indexOf("err=sslvpn_login_permission_denied") !== -1) throw new Error("FortiGate: Invalid credentials.");
+    if (values.redir.indexOf("err=sslvpn_login_permission_denied") !== -1) throw new WrongCredentials();
     throw new Error(`FortiGate: Unknown error (${values.ret}:${values.redir})`);
   }
 
   // Read the magical cookie value.
   const temporaryToken = readSetCookie(responseHeaders.get("set-cookie") ?? "", TMP_TOKEN_COOKIE);
-  if (!temporaryToken) throw new Error("FortiGate: Temporary token cookie not found, can happen when you've entered invalid credentials.");
+  if (!temporaryToken) throw new WrongCredentials();
 
   return {
     redirectionPath: values.redir,

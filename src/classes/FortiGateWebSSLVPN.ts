@@ -5,7 +5,7 @@ import FileEntry, { FileData } from "./File";
 import { readSetCookie } from "../utils/readSetCookie";
 import readNetworkFiles from "../utils/readNetworkFiles";
 import { readProxyID } from "../methods/readProxyID";
-import { AccessDeniedSMB } from "./Errors";
+import { AccessDeniedSMB, WrongCredentials } from "./Errors";
 
 export interface VPNRequestInit {
   /** @default "GET" */
@@ -171,7 +171,7 @@ class FortiGateWebSSLVPN {
 
     // Read the magical cookie value.
     const token = readSetCookie(responseHeaders.get("set-cookie") ?? "", NETWORK_TOKEN_COOKIE);
-    if (!token) throw new Error("FortiGate: Temporary token cookie not found, can happen when you've entered invalid credentials.");
+    if (!token) throw new WrongCredentials();
 
     const json = readNetworkFiles(responseText);
 
